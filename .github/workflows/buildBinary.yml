@@ -1,7 +1,6 @@
 name: Build Binaries
 on:
-  push:
-    branches: [ bugfix-2.1.x ]
+  - push
 
 jobs:
   main:
