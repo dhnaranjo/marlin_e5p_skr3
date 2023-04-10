@@ -1,0 +1,47 @@
+name: Build Binaries
+on:
+  push:
+    branches: [ master ]
+
+jobs:
+  main:
+    name: Build Binaries
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v2
+
+      - name: Setup Python
+        uses: actions/setup-python@master
+        with:
+          python-version: '3.x'
+
+      - name: Install PlatformIO
+        run: |
+          python -m pip install --upgrade pip
+          pip install -U platformio
+
+      - name: Build TFT35 E3 V3.0
+        run: platformio run --environment BOARD_BTT_SKR_V3_0
+
+      - name: Remove Old Binaries
+        run: find "builds/" -name '*.bin' -print -delete
+
+      - name: Copy New Binaries
+        run: find .pio/build/ -name '*.bin' -exec cp -vf '{}' "./builds/" ";"
+
+      - name: Stage New Binaries
+        run: |
+          find "builds/" -name '*.bin' -exec git add {} \;
+
+      - name: Stage New Config
+        run: |
+          find "Copy to SD Card root directory to update/" -name 'config*.ini' -exec git add {} \;
+
+      - name: Push
+        uses: actions-x/commit@v6
+        with:
+          email: itsdesmond@hey.com
+          name: Desmond Naranjo (Action)
+          message: 📦️ Update prebuilt binaries and config
+          token: ${{ secrets.GITHUB_TOKEN }}
